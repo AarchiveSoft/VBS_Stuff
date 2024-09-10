@@ -94,6 +94,40 @@ Else
     s = Cells(ActiveCell.Row - 1, 3).Value
 End If
 
+Dim tm As String
+Dim currentCell As Range
+Dim activeColor As Long
+
+' Get the background color of the active cell
+activeColor = ActiveCell.Interior.color
+
+' Check above the active cell
+Set currentCell = ActiveCell.Offset(-1, 0)
+Do While currentCell.Interior.color = activeColor
+    If InStr(1, currentCell.Value, "tm", vbTextCompare) > 0 Then
+        tm = currentCell.Value
+        Exit Do ' Exit the loop if "tm" is found
+    End If
+    Set currentCell = currentCell.Offset(-1, 0) ' Move one row up
+Loop
+
+' If "tm" wasn't found above, check below the active cell
+If tm = "" Then
+    Set currentCell = ActiveCell.Offset(1, 0)
+    Do While currentCell.Interior.color = activeColor
+        If InStr(1, currentCell.Value, "tm", vbTextCompare) > 0 Then
+            tm = currentCell.Value
+            Exit Do ' Exit the loop if "tm" is found
+        End If
+        Set currentCell = currentCell.Offset(1, 0) ' Move one row down
+    Loop
+End If
+
+' If no match is found, assign default value
+If tm = "" Then
+    tm = "1x TM"
+End If
+
 's = Cells(ActiveCell.Row - 1, 4).Value
 shellobj.SendKeys Format(s, "DD.MM.YYYY")               ' Liefer-Datum
 Sleep sleeptime
@@ -120,6 +154,7 @@ Sleep sleeptime
 s = "tx" & Mid(ActiveCell.Value, 1, 1) & "LS"           'Miete, Test, Rep.-Ersatz
 shellobj.SendKeys s
 
+shellobj.SendKeys "{Enter}^(r)"
 shellobj.SendKeys "{Enter}^(r)"
 
 ' Suchstring aus der Aktuellen Zelle lesen und damit durch alle offenen Execel-iles tingeln um den strin auf der selben zeile wieder zu finden:
@@ -176,7 +211,8 @@ Next datei
 
 'Letzte TextZeile:
 s = "txmie"                                      'Unterschriftsfeld
-shellobj.SendKeys s & "{Enter}"
+shellobj.SendKeys "{Enter}^(r)" & s & "{Enter}"
+shellobj.SendKeys "{Enter}" & "{Enter}" & "{Enter}" & tm & "{TAB}" & "f" & "{Enter}"
 Sleep sleeptime
 
 End Sub
@@ -217,4 +253,5 @@ Sleep 3000
 shellobj.SendKeys "{F7}"         ' Neuer Auftrag
 
 End Sub
+
 
